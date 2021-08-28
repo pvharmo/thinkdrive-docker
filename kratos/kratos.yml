@@ -1,0 +1,97 @@
+version: v0.7.1-alpha.1
+
+dsn: memory
+
+# Settings for both anti-CSRF and session cookies
+# cookies:
+#   domain: local.io
+#   path: /
+#   same_site: Lax
+
+session:
+  cookie:
+    # Overrides cookies.domain for session cookies
+    domain: local.io
+    # Overrides cookies.path for session cookies
+    # path: /
+    # Overrides cookies.samesite for session cookies
+    same_site: Lax
+
+serve:
+  public:
+    base_url: http://local.io/.ory/kratos/public/
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://local.io
+        - http://*.local.io
+  admin:
+    base_url: http://kratos:4434/
+
+selfservice:
+  default_browser_return_url: http://local.io/
+  whitelisted_return_urls:
+    - http://local.io
+    - http://drive.local.io
+
+  methods:
+    password:
+      enabled: true
+
+  flows:
+    error:
+      ui_url: http://.local.io/error
+
+    settings:
+      ui_url: http://local.io/settings
+      privileged_session_max_age: 15m
+
+    recovery:
+      enabled: true
+      ui_url: http://local.io/recovery
+
+    verification:
+      enabled: true
+      ui_url: http://local.io/verify
+      after:
+        default_browser_return_url: http://local.io/
+
+    logout:
+      after:
+        default_browser_return_url: http://local.io/login
+
+    login:
+      ui_url: http://local.io/login
+      lifespan: 10m
+
+    registration:
+      lifespan: 10m
+      ui_url: http://local.io/register
+      after:
+        password:
+          hooks:
+            - hook: session
+
+log:
+  level: trace
+  format: text
+  leak_sensitive_values: true
+
+secrets:
+  cookie:
+    - AN-INSECURE-COOKIE-SECRET
+
+hashers:
+  argon2:
+    parallelism: 1
+    memory: 128MB
+    iterations: 2
+    salt_length: 16
+    key_length: 16
+
+identity:
+  default_schema_url: file:///etc/config/kratos/identity.schema.json
+
+courier:
+  smtp:
+    connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true&legacy_ssl=true
