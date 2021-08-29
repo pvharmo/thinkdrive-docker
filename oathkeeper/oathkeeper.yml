@@ -72,6 +72,19 @@ authorizers:
   allow:
     enabled: true
 
+  remote_json:
+    enabled: true
+    config:
+      remote: http://keto:4466/check
+      forward_response_headers_to_upstream: []
+      payload: |
+        {
+          "namespace": "videos",
+          "subject": "{{ print .Subject }}",
+          "object": "{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "{{ .MatchContext.Method }}"
+        }
+
 mutators:
   noop:
     enabled: true

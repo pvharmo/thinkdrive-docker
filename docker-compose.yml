@@ -81,9 +81,37 @@ services:
     command: serve proxy -c "/etc/config/oathkeeper/oathkeeper.yml"
     environment:
       - LOG_LEVEL=debug
+      - LOG_LEAK_SENSITIVE_VALUES=true
     restart: on-failure
     volumes:
       - ./oathkeeper:/etc/config/oathkeeper
+
+  keto:
+    image: oryd/keto:v0.6.0-alpha.1-sqlite
+    ports:
+      - '4466:4466'
+      - '4467:4467'
+    command: serve -c /home/ory/keto.yml
+    restart: on-failure
+    environment:
+      - LOG_LEVEL=debug
+      - LOG_LEAK_SENSITIVE_VALUES=true
+      - KETO_READ_REMOTE=keto:4466
+    volumes:
+      - type: bind
+        source: ./keto
+        target: /home/ory
+
+  keto-init:
+    image: oryd/keto:v0.6.0-alpha.1-sqlite
+    environment:
+      - KETO_WRITE_REMOTE=keto:4467
+    volumes:
+      - type: bind
+        source: ./keto
+        target: /home/ory
+    command: relation-tuple create /home/ory/relation-tuples
+    restart: on-failure
 
 volumes:
   db-data:
