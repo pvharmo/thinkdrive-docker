@@ -87,30 +87,38 @@ services:
       - ./oathkeeper:/etc/config/oathkeeper
 
   keto:
-    image: oryd/keto:v0.6.0-alpha.1-sqlite
+    image: oryd/keto:v0.6.0-alpha.3
+    depends_on:
+      - keto-migrate
     ports:
       - '4466:4466'
       - '4467:4467'
-    command: serve -c /home/ory/keto.yml
+    command: serve -c /etc/config/keto/keto.yml all
     restart: on-failure
     environment:
-      - LOG_LEVEL=debug
-      - LOG_LEAK_SENSITIVE_VALUES=true
-      - KETO_READ_REMOTE=keto:4466
+      DSN: postgres://admin:example@db:5432/authorization?sslmode=disable&max_conns=20&max_idle_conns=4
+      LOG_LEVEL: debug
+      LOG_LEAK_SENSITIVE_VALUES: "true"
+      KETO_READ_REMOTE: keto:4466
     volumes:
-      - type: bind
+      -
+        type: bind
         source: ./keto
-        target: /home/ory
+        target: /etc/config/keto
 
-  keto-init:
-    image: oryd/keto:v0.6.0-alpha.1-sqlite
+  keto-migrate:
+    image: oryd/keto:v0.6.0-alpha.3
+    depends_on:
+      - db
     environment:
-      - KETO_WRITE_REMOTE=keto:4467
+      KETO_WRITE_REMOTE: keto:4467
+      DSN: postgres://admin:example@db:5432/authorization?sslmode=disable&max_conns=20&max_idle_conns=4
     volumes:
       - type: bind
         source: ./keto
-        target: /home/ory
-    command: relation-tuple create /home/ory/relation-tuples
+        target: /etc/config/keto
+    command:
+      migrate up --all-namespaces -c /etc/config/keto/keto.yml --yes
     restart: on-failure
 
 volumes:
