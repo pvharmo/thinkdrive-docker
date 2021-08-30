@@ -71,6 +71,11 @@ selfservice:
         password:
           hooks:
             - hook: session
+            - hook: web_hook
+              config:
+                url: http://172.17.0.1:3000/internal/new-user
+                method: POST
+                body: /etc/config/kratos/web_hook_registration_body.jsonnet
 
 log:
   level: trace

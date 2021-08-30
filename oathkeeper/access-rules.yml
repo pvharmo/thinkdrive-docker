@@ -67,7 +67,7 @@
     url: 'http://172.17.0.1:3000/'
     strip_path: /server
   match:
-    url: 'http://drive.local.io/server/<[^\/]*>/<.*>'
+    url: 'http://drive.local.io/server/<(?!internal)[^\/]*>/<.*>'
     methods:
       - GET
       - POST
