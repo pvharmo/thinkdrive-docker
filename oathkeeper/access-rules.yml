@@ -77,6 +77,6 @@
   authenticators:
     - handler: cookie_session
   authorizer:
-    handler: remote_json
+    handler: allow
   mutators:
     - handler: noop
